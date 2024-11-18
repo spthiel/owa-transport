@@ -1,0 +1,16 @@
+{
+  "name": "owa-transport",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/build.mjs",
+  "scripts": {
+    "start": "node ."
+  },
+  "private": true,
+  "dependencies": {
+    "clean-css": "^5.3.3",
+    "esbuild": "^0.24.0",
+    "react": "^18.3.1",
+    "sass": "^1.81.0"
+  }
+}

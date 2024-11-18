@@ -1,0 +1,10 @@
+// ==UserScript==
+// @name         OWA-Transport
+// @namespace    http://tampermonkey.net/
+// @version      2024-11-18
+// @description  Add an export and import button to the inbox-rules view
+// @author       Elspeth
+// @match        $BASEURL$/owa/
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=outlook.com
+// @grant        none
+// ==/UserScript==
