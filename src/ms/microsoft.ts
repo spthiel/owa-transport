@@ -19,16 +19,16 @@ function getCanaryCookie(): string {
 }
 
 function fetchService(action: string, data: object) {
-	const URLPostData = encodeURIComponent(JSON.stringify(data));
+	const postData = JSON.stringify(data);
 	const headers = new Headers();
 	
 	headers.append('action', action);
 	headers.append('x-owa-canary', getCanaryCookie());
-	headers.append('x-owa-urlpostdata', URLPostData);
 	
 	return fetch(`${baseURL}/owa/service.svc`, {
-		method: "GET",
-		headers: headers
+		method: "POST",
+		headers: headers,
+		body: postData
 	})
 }
 
