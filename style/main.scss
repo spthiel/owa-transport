@@ -1,14 +1,1 @@
-$border-color: gray;
-$backdrop: rgba(0, 0, 0, 0.3);
-
-.owa-transport {
-    &::backdrop {
-        background: $backdrop;
-    }
-
-    border: 0.0625rem solid $border-color;
-    border-radius: 1rem;
-    min-width: 10rem;
-    min-height: 5rem;
-    box-shadow: $border-color 0 0 .5rem 0.0625rem;
-}
+@use "styles";

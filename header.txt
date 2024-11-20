@@ -7,4 +7,5 @@
 // @match        $BASEURL$/owa/
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=outlook.com
 // @grant        none
+// @sandbox      DOM
 // ==/UserScript==

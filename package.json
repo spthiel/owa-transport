@@ -4,13 +4,22 @@
   "description": "",
   "main": "build/build.mjs",
   "scripts": {
+    "build": "npm run template && npm run start",
+    "template": "node build/build-html.mjs",
     "start": "node ."
   },
   "private": true,
   "dependencies": {
-    "clean-css": "^5.3.3",
+    "clean-css": "github:clean-css/clean-css#3cacd4b",
     "esbuild": "^0.24.0",
+    "prettier": "^3.3.3",
     "react": "^18.3.1",
-    "sass": "^1.81.0"
+    "sass": "^1.81.0",
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^22.9.1",
+    "jsdom": "^25.0.1"
   }
 }

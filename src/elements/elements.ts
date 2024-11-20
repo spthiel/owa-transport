@@ -1,80 +1,108 @@
 import createElement from "./createElement";
+import DialogTemplate from "../template/Dialog.template";
+import CheckboxTemplate from "../template/Checkbox.template";
+import ref, { Signal } from "../data/Signal";
+import ExportDialogTemplate from "../template/ExportDialog.template";
+import ExportDialogRowTemplate from "../template/ExportDialogRow.template";
+import { InboxRule } from "../ms/REST";
 
-function icon(icon: string) {
-	return createElement(
-		'span',
-		["_fc_3", "owaimg", "_opc_g", `ms-Icon--${icon}`, "ms-icon-font-size-18", "ms-fcl-ns-b"],
-	)
+function checkbox(checked: boolean = true) {
+	const checkbox = CheckboxTemplate();
+	const checkedState = ref<boolean>(true);
+
+	checkbox.root.addEventListener("click", (ev) => {
+		checked = !checked;
+		checkedState.value = checked;
+	});
+
+	checkedState.effect((isChecked) => {
+		const list = checkbox.icon.classList;
+		if (isChecked) {
+			list.add("ms-Icon--checkboxCheck");
+		} else {
+			list.remove("ms-Icon--checkboxCheck");
+		}
+	});
+
+	checkedState.value = checked;
+
+	return {
+		root: checkbox.root,
+		checked: checkedState,
+	};
 }
 
-function iconButton(title: string, iconName: string) {
-	return createElement(
-		'button',
-		['_opc_e', 'ms-font-xs', 'ms-font-color-neutralSecondary', 'o365button'],
-		{
-			'title': title
-		},
-		icon(iconName)
-	)
+function exportDialogRow(name: string) {
+	const row = ExportDialogRowTemplate();
+	const cb = checkbox();
+
+	row.col1.append(cb.root);
+	row.name.innerText = name;
+
+	return {
+		root: row.root,
+		checked: cb.checked,
+	};
 }
 
-function dialog(title: string, ...children: Node[]) {
-	
-	const closeElement = iconButton('close', '')
-	
-	const titleElement = createElement(
-		'h2',
-		['title'],
-		{},
-		title
-	)
-	
-	const header = createElement(
-		'div',
-		['header'],
-		{},
-		titleElement
-	)
-	
-	const body = createElement(
-		'div',
-		[],
-		{},
-		...children
-	)
-	
-	const dialog = createElement(
-		'dialog',
-		['owa-transport'],
-		{},
-		header,
-		body
-	) as HTMLDialogElement
-	
-	document.body.appendChild(dialog);
-	
-	dialog.showModal();
-	
-	return dialog;
+function exportDialog(inboxRules: InboxRule[]) {
+	const exportDialog = ExportDialogTemplate();
+	const containerDialog = dialog("Export Inbox Rules");
+
+	containerDialog.body.appendChild(exportDialog.root);
+
+	const checked: Record<string, Signal<boolean>> = {};
+
+	for (const rule of inboxRules) {
+		const row = exportDialogRow(rule.Name);
+		exportDialog.grid.append(row.root);
+
+		checked[rule.Identity.RawIdentity] = row.checked;
+	}
+
+	const selectAllCheckbox = checkbox();
+
+	exportDialog.selectAll.append(selectAllCheckbox.root);
+	selectAllCheckbox.checked.effect((isChecked) => {
+		Object.values(checked).forEach((signal) => (signal.value = isChecked));
+	});
+
+	return {
+		root: containerDialog.root,
+		states: checked,
+		button: exportDialog.button,
+	};
+}
+
+function dialog(title: string) {
+	const dialog = DialogTemplate();
+
+	dialog.root.addEventListener("close", (event) => {
+		dialog.root.remove();
+	});
+
+	dialog.title.innerText = title;
+
+	return {
+		root: dialog.root,
+		body: dialog.body,
+	};
 }
 
 function css() {
-	const style = createElement(
-		'style',
-		[],
-		{
-			'owa-transport': 'injected'
-		}
-	)
-	
+	const style = createElement("style", [], {
+		"owa-transport": "injected",
+	});
+
 	style.innerText = STYLESHEET;
-	
+
 	return style;
 }
 
 export default {
-	icon,
-	iconButton,
+	css,
 	dialog,
-	css
-}
+	checkbox,
+	exportDialog,
+	exportDialogRow,
+};

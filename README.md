@@ -14,14 +14,16 @@ Copy the contents of the dist/index.js file into your preferred user-script brow
 
 ## TODO
 
+- [x] Create template engine
 - [x] Inject elements add the correct location
 - [x] Add import and export button
 - [x] Add dialog
-- [ ] Add minimal required elements to dialog (title, close button)
+- [x] Add minimal required elements to dialog (title, close button)
 - [x] Obtain existing inbox rules from outlook via service api
-- [ ] Filter rule values to actually set values
-- [ ] Implement multi-select for rules to export
-- [ ] Implement export functionality
+- [x] Filter rule values to actually set values
+- [x] Implement multi-select for rules to export
+- [x] Implement export functionality
 - [ ] Implement import functionality
 - [ ] Display required categories before import
 - [ ] Automatically create categories after import
+- [ ] Implement export and import of folder data
