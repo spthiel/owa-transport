@@ -1,23 +1,22 @@
 import createElement from "./createElement";
 import DialogTemplate from "../template/Dialog.template";
 import CheckboxTemplate from "../template/Checkbox.template";
-import ref, { Signal } from "../data/Signal";
-import ExportDialogTemplate from "../template/ExportDialog.template";
-import ExportDialogRowTemplate from "../template/ExportDialogRow.template";
-import { InboxRule } from "../ms/REST";
+import ref from "../data/Ref";
+import FileUploadTemplate from "../template/FileUpload.template";
+import CheckboxRowTemplate from "../template/CheckboxRow.template";
 
 function checkbox(checked: boolean = true) {
 	const checkbox = CheckboxTemplate();
 	const checkedState = ref<boolean>(true);
 
 	checkbox.root.addEventListener("click", (ev) => {
-		checked = !checked;
-		checkedState.value = checked;
+		checkedState.value = !checked;
 	});
 
 	checkedState.effect((isChecked) => {
 		const list = checkbox.icon.classList;
-		if (isChecked) {
+		checked = isChecked;
+		if (checked) {
 			list.add("ms-Icon--checkboxCheck");
 		} else {
 			list.remove("ms-Icon--checkboxCheck");
@@ -32,45 +31,42 @@ function checkbox(checked: boolean = true) {
 	};
 }
 
-function exportDialogRow(name: string) {
-	const row = ExportDialogRowTemplate();
-	const cb = checkbox();
+function fileUpload(buttonText: string, info: string) {
+	const upload = FileUploadTemplate();
 
-	row.col1.append(cb.root);
-	row.name.innerText = name;
+	upload.info.innerText = info;
+	upload.buttonText.innerText = buttonText;
 
-	return {
-		root: row.root,
-		checked: cb.checked,
-	};
-}
+	const file = ref<File | undefined>(undefined);
+	const error = ref<string | undefined>(undefined);
 
-function exportDialog(inboxRules: InboxRule[]) {
-	const exportDialog = ExportDialogTemplate();
-	const containerDialog = dialog("Export Inbox Rules");
+	upload.button.addEventListener("click", (event) => {
+		upload.fileUpload.click();
+	});
 
-	containerDialog.body.appendChild(exportDialog.root);
+	upload.fileUpload.addEventListener("change", (event) => {
+		file.value = upload.fileUpload.files?.[0];
+	});
 
-	const checked: Record<string, Signal<boolean>> = {};
+	error.effect((error) => {
+		if (!error) {
+			upload.error.setAttribute("hidden", "");
+			upload.errorText.innerText = "";
+			return;
+		}
+		upload.error.removeAttribute("hidden");
+		upload.errorText.innerText = error;
+	});
 
-	for (const rule of inboxRules) {
-		const row = exportDialogRow(rule.Name);
-		exportDialog.grid.append(row.root);
-
-		checked[rule.Identity.RawIdentity] = row.checked;
-	}
-
-	const selectAllCheckbox = checkbox();
-
-	exportDialog.selectAll.append(selectAllCheckbox.root);
-	selectAllCheckbox.checked.effect((isChecked) => {
-		Object.values(checked).forEach((signal) => (signal.value = isChecked));
+	file.effect((selectedFile) => {
+		upload.fileName.value = selectedFile?.name || "";
 	});
 
 	return {
-		root: containerDialog.root,
-		states: checked,
-		button: exportDialog.button,
+		root: upload.root,
+		fileUpload: upload.fileUpload,
+		file: file,
+		error: error,
 	};
 }
 
@@ -99,10 +95,23 @@ function css() {
 	return style;
 }
 
+function checkboxRow(name: string, checked: boolean = true) {
+	const row = CheckboxRowTemplate();
+	const cb = checkbox(checked);
+
+	row.col1.append(cb.root);
+	row.name.innerText = name;
+
+	return {
+		root: row.root,
+		checked: cb.checked,
+	};
+}
+
 export default {
 	css,
 	dialog,
 	checkbox,
-	exportDialog,
-	exportDialogRow,
+	fileUpload,
+	checkboxRow,
 };

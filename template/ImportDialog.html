@@ -1,1 +1,42 @@
-<div></div>
+<div class="import-dialog">
+	<div class="upload" ref="upload">
+	</div>
+	<div class="owa-transport-table" hidden ref="table">
+		<div class="row header ms-border-color-neutralLight">
+			<div class="cell col1 ms-border-color-neutralLight">
+				<span>Import</span>
+			</div>
+			<div class="cell col2">
+				<span>Name</span>
+			</div>
+		</div>
+		<div
+			class="row scroller customScrollBar ms-border-color-neutralLight"
+			ref="grid"
+		>
+			<div class="row selectAll ms-bg-color-themeLighter">
+				<div class="cell col1" ref="selectAll">
+				</div>
+				<div class="cell col2">
+					<span class="text-large">Select all</span>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div>
+		<button
+			aria-label="Import selected rules"
+			class="_op_Y8 ms-border-color-themePrimary o365button restButton ms-bg-color-neutralLighter ms-border-color-neutralTertiary ms-font-color-neutralPrimary"
+			ref="button"
+			type="submit"
+		>
+			<span class="_fc_4 o365buttonLabel">Import</span>
+		</button>
+	</div>
+	<div class="progress">
+		<span
+			hidden
+			ref="progressTracker"
+		>Importing:<span ref="progress"></span>/<span ref="max"></span>rules imported.</span>
+	</div>
+</div>

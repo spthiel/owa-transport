@@ -23,7 +23,7 @@ Copy the contents of the dist/index.js file into your preferred user-script brow
 - [x] Filter rule values to actually set values
 - [x] Implement multi-select for rules to export
 - [x] Implement export functionality
-- [ ] Implement import functionality
+- [x] Implement import functionality
 - [ ] Display required categories before import
 - [ ] Automatically create categories after import
 - [ ] Implement export and import of folder data

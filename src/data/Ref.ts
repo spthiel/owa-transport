@@ -1,4 +1,4 @@
-class Signal<T> {
+class Ref<T> {
 	private listeners: Record<number, (value: T) => any> = {};
 	private uid = 0;
 
@@ -31,8 +31,8 @@ class Signal<T> {
 	}
 }
 
-export type { Signal };
+export type { Ref };
 
-export default function ref<T>(value: T): Signal<T> {
-	return new Signal<T>(value);
+export default function ref<T>(value: T): Ref<T> {
+	return new Ref<T>(value);
 }

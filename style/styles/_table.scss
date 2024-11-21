@@ -1,0 +1,49 @@
+.owa-transport-table {
+
+	display: grid;
+	grid-template-columns: 70px 428px;
+	grid-template-rows: 20px;
+
+	.row {
+		display: grid;
+		grid-template-columns: subgrid;
+		grid-template-rows: 1fr;
+		grid-column: 1 / -1;
+	}
+
+	.cell {
+		display: flex;
+		align-items: center;
+		padding: 0 5px;
+	}
+
+	.col1 {
+		grid-column: 1 / span 1;
+	}
+
+	.col2 {
+		grid-column: 2 / span 1;
+	}
+
+	.scroller {
+		display: grid;
+		overflow-x: hidden;
+		overflow-y: auto;
+		max-height: 180px;
+		border-width: 1px;
+		border-bottom-style: solid;
+		grid-auto-rows: 1fr;
+		grid-template-columns: subgrid;
+	}
+
+	.header {
+		height: 20px;
+		border-width: 1px;
+		border-style: solid;
+
+		.col1 {
+			border-width: 1px;
+			border-right-style: solid;
+		}
+	}
+}

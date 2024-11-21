@@ -1,8 +1,12 @@
 import CONST from "../data/CONST";
 import ImportTemplate from "../template/Import.template";
-import ImportDialogTemplate from "../template/ImportDialog.template";
+import importElements from "../elements/importElements";
+import { Ref } from "../data/Ref";
+import REST, { ImportInboxRule, UnidentifiedInboxRule } from "../ms/REST";
 
-function convertExportedRuleToImportableRule() {
+function convertExportedRuleToImportableRule(
+	rule: UnidentifiedInboxRule | ImportInboxRule,
+): ImportInboxRule {
 	// __type: PeopleIdentity:#Exchange
 	// RoutingType -> SMTP
 	// Ignore Address, AddressOrigin
@@ -11,6 +15,114 @@ function convertExportedRuleToImportableRule() {
 	// Priority used for sorting
 	// ---------------
 	// TODO: Check CopyToFolder, MoveToFolder
+
+	delete rule["Priority"];
+
+	for (const prop of REST.propsToClean) {
+		delete rule[prop];
+	}
+
+	for (const prop of REST.identityProps) {
+		if (!Array.isArray(rule[prop])) {
+			continue;
+		}
+		rule[prop][0].__type = "PeopleIdentity:#Exchange";
+	}
+
+	for (const prop in rule) {
+		if (typeof rule[prop] !== "string") {
+			continue;
+		}
+		if (rule[prop].startsWith("Null")) {
+			delete rule[prop];
+		}
+	}
+
+	rule.Name += " (Imported)";
+	rule.IsEnabled = false;
+
+	return rule;
+}
+
+function processExportedRules(
+	rules: UnidentifiedInboxRule[],
+): ImportInboxRule[] {
+	// Lower priority higher -> added last
+	rules.sort((ruleA, ruleB) => ruleB.Priority - ruleA.Priority);
+
+	return rules.map(convertExportedRuleToImportableRule);
+}
+
+function onFileChange(
+	error: Ref<string | undefined>,
+	rows: Ref<UnidentifiedInboxRule[]>,
+) {
+	console.log("New instance");
+	return (file: File | undefined) => {
+		console.log("File Changed!");
+		if (!file) {
+			error.value = undefined;
+			rows.value = [];
+			return;
+		}
+
+		if (
+			file.name.substring(file.name.lastIndexOf(".") + 1) !==
+			CONST.FILE_EXTENSION
+		) {
+			error.value = `Selected file is not of type '${CONST.FILE_EXTENSION}'`;
+			rows.value = [];
+			return;
+		}
+		error.value = undefined;
+		rows.value = [];
+		const fileReader = new FileReader();
+
+		fileReader.onload = () => {
+			const result = fileReader.result as string | null;
+			if (!result) {
+				error.value = "Could not read file.";
+				return;
+			}
+			rows.value = JSON.parse(result);
+		};
+
+		fileReader.readAsText(file);
+	};
+}
+
+function newImportObject() {
+	return {
+		__type: "NewInboxRuleRequest:#Exchange",
+		Header: {
+			__type: "JsonRequestHeaders:#Exchange",
+			RequestServerVersion: "Exchange2013",
+			TimeZoneContext: {
+				__type: "TimeZoneContext:#Exchange",
+				TimeZoneDefinition: {
+					__type: "TimeZoneDefinitionType:#Exchange",
+					Id: "W. Europe Standard Time",
+				},
+			},
+		},
+		AlwaysDeleteOutlookRulesBlob: false,
+		Force: false,
+		InboxRule: {} as Record<string, any>,
+	};
+}
+
+async function importRows(
+	rules: UnidentifiedInboxRule[],
+	progress: Ref<number>,
+) {
+	const importRules = processExportedRules(rules);
+	const importObject = newImportObject();
+	for (const row of importRules) {
+		importObject.InboxRule = row;
+		importObject.InboxRule.__type = "InboxRule:#Exchange";
+		await REST.saveInboxRule(importObject);
+		progress.value++;
+	}
 }
 
 function getElement() {
@@ -21,14 +133,23 @@ function getElement() {
 	const button = ImportTemplate().root;
 
 	button.addEventListener("click", (event) => {
-		const dialog = ImportDialogTemplate();
+		const dialog = importElements.importDialog();
 
-		// dialog.root.addEventListener("close", (event) => {
-		// 	dialog.root.remove();
-		// })
-		//
-		// document.body.appendChild(dialog.root);
-		// dialog.root.showModal();
+		document.body.appendChild(dialog.root);
+		dialog.root.showModal();
+
+		dialog.file.effect(onFileChange(dialog.error, dialog.rows));
+
+		dialog.button.addEventListener("click", async (event) => {
+			dialog.button.setAttribute("disabled", "disabled");
+			await importRows(
+				dialog.rows.value.filter(
+					(rule) => dialog.checked.value[rule.Name].value,
+				),
+				dialog.progress,
+			);
+			location.reload();
+		});
 	});
 
 	div.appendChild(button);
@@ -38,21 +159,3 @@ function getElement() {
 export default {
 	getElement,
 };
-
-/*
-cookieStore.get("X-OWA-CANARY")
-  .then(value => value.value)
-  .then((cookie) => {
-    fetch(
-    	url
-      {
-        "headers": {
-          "action": "NewInboxRule",
-          "x-owa-canary": cookie,
-          "x-owa-urlpostdata": "%7B%22__type%22%3A%22NewInboxRuleRequest%3A%23Exchange%22%2C%22Header%22%3A%7B%22__type%22%3A%22JsonRequestHeaders%3A%23Exchange%22%2C%22RequestServerVersion%22%3A%22Exchange2013%22%2C%22TimeZoneContext%22%3A%7B%22__type%22%3A%22TimeZoneContext%3A%23Exchange%22%2C%22TimeZoneDefinition%22%3A%7B%22__type%22%3A%22TimeZoneDefinitionType%3A%23Exchange%22%2C%22Id%22%3A%22W.%20Europe%20Standard%20Time%22%7D%7D%7D%2C%22InboxRule%22%3A%7B%22__type%22%3A%22InboxRule%3A%23Exchange%22%2C%22Name%22%3A%22Test%22%2C%22StopProcessingRules%22%3Atrue%2C%22SubjectContainsWords%22%3A%5B%22test%22%5D%2C%22WithinSizeRangeMinimum%22%3A0%2C%22WithinSizeRangeMaximum%22%3A0%2C%22ApplyCategory%22%3A%5B%22Assigned%22%5D%7D%2C%22AlwaysDeleteOutlookRulesBlob%22%3Afalse%2C%22Force%22%3Afalse%7D",
-        },
-        "method": "POST",
-      }
-    );
-})
- */
