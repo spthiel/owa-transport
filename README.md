@@ -27,3 +27,4 @@ Copy the contents of the dist/index.js file into your preferred user-script brow
 - [ ] Display required categories before import
 - [ ] Automatically create categories after import
 - [ ] Implement export and import of folder data
+- [ ] Aria
