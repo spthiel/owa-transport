@@ -1,5 +1,5 @@
 import CONST from "../data/CONST";
-import Import from './Import'
+import Import from "./Import";
 import Export from "./Export";
 
 const FIND_CLASS = CONST.ELEMENT_CLASS;
@@ -9,37 +9,46 @@ function isHTMLElement(node: Node): node is HTMLElement {
 }
 
 function inject(target: HTMLDivElement) {
-	target.appendChild(Export.getElement())
-	target.appendChild(Import.getElement())
+	target.appendChild(Export.getElement());
+	target.appendChild(Import.getElement());
 }
 
 function callback(records: MutationRecord[]) {
 	if (location.hash !== CONST.HASH) {
 		return;
 	}
-	
+
 	for (const record of records) {
 		for (const node of record.addedNodes) {
 			if (!isHTMLElement(node)) {
 				continue;
 			}
-			
+
 			const element = node.getElementsByClassName(FIND_CLASS);
-			
+
 			if (element.length === 0) {
 				continue;
 			}
-			
+
 			const target = element[0].parentNode;
-			
-			if (target === null || !('tagName' in target) || target.tagName !== 'DIV') {
-				console.error('Found target but parent was not a div element. Not injecting. Target: ', element[0], 'Parent: ', target);
+
+			if (
+				target === null ||
+				!("tagName" in target) ||
+				target.tagName !== "DIV"
+			) {
+				console.error(
+					"Found target but parent was not a div element. Not injecting. Target: ",
+					element[0],
+					"Parent: ",
+					target,
+				);
 				continue;
 			}
-			
+
 			inject(target as HTMLDivElement);
-			console.log('Inject');
-			
+			console.log("Inject");
+
 			return;
 		}
 	}
@@ -47,13 +56,11 @@ function callback(records: MutationRecord[]) {
 
 function observe() {
 	const observer = new MutationObserver(callback);
-	
+
 	observer.observe(document.body, {
 		subtree: true,
-		childList: true
-	})
+		childList: true,
+	});
 }
 
-export {
-	observe
-}
+export { observe };
