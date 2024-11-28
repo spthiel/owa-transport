@@ -53,6 +53,43 @@ function processExportedRules(
 	return rules.map(convertExportedRuleToImportableRule);
 }
 
+function isValidFile(file: File | undefined): boolean {
+	if (!file) {
+		return true;
+	}
+
+	const fileExtension = file.name.substring(file.name.lastIndexOf(".") + 1);
+
+	return fileExtension === CONST.FILE_EXTENSION;
+}
+
+async function readRuleFromFile(
+	file: File | undefined,
+): Promise<ImportInboxRule[]> {
+	if (!file) {
+		return [];
+	}
+
+	if (!isValidFile(file)) {
+		return [];
+	}
+
+	return new Promise((resolve) => {
+		const fileReader = new FileReader();
+
+		fileReader.onload = () => {
+			const result = fileReader.result as string | null;
+			if (!result) {
+				resolve([]);
+				return;
+			}
+			resolve(JSON.parse(result));
+		};
+
+		fileReader.readAsText(file);
+	});
+}
+
 function onFileChange(
 	error: Ref<string | undefined>,
 	rows: Ref<UnidentifiedInboxRule[]>,
@@ -158,4 +195,6 @@ function getElement() {
 
 export default {
 	getElement,
+	readRulesFromFile: readRuleFromFile,
+	isValidFile,
 };

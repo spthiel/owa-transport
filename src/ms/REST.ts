@@ -13,7 +13,7 @@ export interface UnidentifiedInboxRule extends ImportInboxRule {
 
 export interface ImportInboxRule {
 	Name: string;
-	ApplyCategory: string[];
+	ApplyCategory: [string];
 
 	[key: string]: unknown;
 }

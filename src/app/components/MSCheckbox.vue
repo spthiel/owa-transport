@@ -2,7 +2,7 @@
 const checked = defineModel<boolean>("checked", { required: true });
 
 defineProps<{
-	label: string;
+	label?: string;
 }>();
 </script>
 <template>

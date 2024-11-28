@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import NativeDialog from "../components/NativeDialog.vue";
-import { InboxRule } from "../../ms/REST";
-import MSCheckbox from "../components/MSCheckbox.vue";
-import { reactive, ref, watch } from "vue";
+import REST, { InboxRule } from "../../ms/REST";
+import Export from "../../main/Export";
+import CheckboxTable from "../components/checkboxTable/CheckboxTable.vue";
 
 const open = defineModel<boolean>("open", { required: true });
 
@@ -10,22 +10,24 @@ const emit = defineEmits<{
 	export: [Record<string, boolean>];
 }>();
 
-defineProps<{
+const { inboxRules } = defineProps<{
 	inboxRules: InboxRule[];
 }>();
 
-const allChecked = ref<boolean>(true);
+let checkedRules = inboxRules;
 
-const states = reactive<Record<string, boolean>>({});
+function onChange(rules: InboxRule[]) {
+	checkedRules = rules;
+}
 
-watch(states, (value) => {
-	allChecked.value =
-		Object.values(states).find((state) => !state) === undefined;
-});
+async function startExport() {
+	const checkedIds = checkedRules.map((rule) => rule.Identity.RawIdentity);
 
-function changeAll(value: boolean) {
-	Object.keys(states).forEach((key) => (states[key] = value));
-	allChecked.value = value;
+	const rules = await REST.getInboxRules();
+
+	Export.exportRules(
+		rules.filter((rule) => checkedIds.includes(rule.Identity.RawIdentity)),
+	);
 }
 </script>
 
@@ -41,38 +43,13 @@ function changeAll(value: boolean) {
 						<span>Name</span>
 					</div>
 				</div>
-				<div
-					ref="grid"
-					class="row scroller customScrollBar ms-border-color-neutralLight"
-				>
-					<div class="row selectAll ms-bg-color-themeLighter">
-						<div class="cell col1">
-							<MSCheckbox
-								:checked="allChecked"
-								label="Select all"
-								@update:checked="changeAll"
-							/>
-						</div>
-						<div class="cell col2">
-							<span class="text-large">Select all</span>
-						</div>
-					</div>
-				</div>
-				<template v-for="rule in inboxRules">
-					<div class="row checkbox-row">
-						<div class="cell col1">
-							<MSCheckbox
-								v-model:checked="
-									states[rule.Identity.RawIdentity]
-								"
-								label="Export {{ rule.Name }}"
-							/>
-						</div>
-						<div class="cell col2">
-							<span class="text-large">{{ rule.Name }}</span>
-						</div>
-					</div>
-				</template>
+				<CheckboxTable
+					:default-value="true"
+					:key-of="(rule) => rule.Identity.RawIdentity"
+					:values="inboxRules"
+					label-field="Name"
+					@change="onChange"
+				/>
 			</div>
 			<div>
 				<button
@@ -80,7 +57,7 @@ function changeAll(value: boolean) {
 					aria-label="Export selected rules"
 					class="_op_Y8 ms-border-color-themePrimary o365button restButton ms-bg-color-neutralLighter ms-border-color-neutralTertiary ms-font-color-neutralPrimary"
 					type="submit"
-					@click="emit('export', states)"
+					@click="startExport"
 				>
 					<span class="_fc_4 o365buttonLabel">Export</span>
 				</button>

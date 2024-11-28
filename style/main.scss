@@ -1,1 +1,11 @@
 @use "styles";
+
+.owa-transport-buttons {
+	display: flex;
+	flex-direction: row;
+	gap: 5px;
+}
+
+#owaTransportDialogRoot {
+	width: inherit;
+}

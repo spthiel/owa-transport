@@ -1,11 +1,9 @@
 import CONST from "../data/CONST";
-import ExportTemplate from "../template/Export.template";
 import REST, {
 	ExportIdentity,
 	InboxRule,
 	UnidentifiedInboxRule,
 } from "../ms/REST";
-import exportElements from "../elements/exportElements";
 
 function formatPeopleIdentity(identity: ExportIdentity) {
 	return {
@@ -74,40 +72,14 @@ function getDateTime(): string {
 	return `${date.getFullYear()}-${padZero(date.getMonth() + 1)}-${padZero(date.getDate())}_${padZero(date.getHours())}-${padZero(date.getMinutes())}-${padZero(date.getSeconds())}`;
 }
 
-function getElement() {
-	const div = document.createElement("div");
+function exportRules(rules: InboxRule[]) {
+	const rulesToExport = [...rules].map((rule) => cleanRule(rule));
 
-	div.classList.add(CONST.ELEMENT_CLASS);
+	const json = JSON.stringify(rulesToExport, null, 4);
 
-	const button = ExportTemplate().root;
-
-	button.addEventListener("click", async (event) => {
-		const rules = await REST.getInboxRules();
-		const dialog = exportElements.exportDialog(rules);
-
-		document.body.appendChild(dialog.root);
-		dialog.root.showModal();
-
-		dialog.button.addEventListener("click", () => {
-			const rulesToExport = rules
-				.filter(
-					(rule) => dialog.states[rule.Identity.RawIdentity].value,
-				)
-				.map((rule) => cleanRule(rule));
-
-			const json = JSON.stringify(rulesToExport, null, 4);
-
-			download(
-				`inbox-rules-${getDateTime()}.${CONST.FILE_EXTENSION}`,
-				json,
-			);
-		});
-	});
-
-	div.appendChild(button);
-	return div;
+	download(`inbox-rules-${getDateTime()}.${CONST.FILE_EXTENSION}`, json);
 }
 
 export default {
-	getElement,
+	exportRules,
 };

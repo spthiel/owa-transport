@@ -1,14 +1,16 @@
 <script lang="ts" setup>
 import { ref, useTemplateRef } from "vue";
 
-const { error = undefined } = defineProps<{
+const file = defineModel<File | undefined>("file");
+
+defineProps<{
 	buttonText: string;
 	info: string;
-	error: string;
+	error?: string;
 }>();
 
 const fileUpload = useTemplateRef<HTMLInputElement>("fileUpload");
-const fileName = ref<string>();
+const fileName = ref<string>(file.value?.name || "");
 
 const emit = defineEmits<{
 	change: [File | undefined];
@@ -16,15 +18,15 @@ const emit = defineEmits<{
 
 function onUpload(event: Event) {
 	const target = event.target as HTMLInputElement;
-	const file = target.files?.[0];
-	if (!file) {
-		emit("change", undefined);
+	const uploadedFile = target.files?.[0];
+	if (!uploadedFile) {
+		file.value = undefined;
 		fileName.value = "";
 		return;
 	}
 
-	fileName.value = file.name;
-	emit("change", file);
+	fileName.value = uploadedFile.name;
+	file.value = uploadedFile;
 }
 </script>
 
@@ -32,7 +34,6 @@ function onUpload(event: Event) {
 	<div>
 		<span class="_op_71">{{ info }}</span>
 		<input
-			ref="fileName"
 			:value="fileName"
 			aria-readonly="true"
 			class="_op_a1 allowTextSelection textbox ms-font-s ms-fwt-sl ms-fcl-np ms-bcl-nta ms-bcl-nsa-h"
@@ -51,9 +52,9 @@ function onUpload(event: Event) {
 		</button>
 		<div>
 			<span class="_op_61 ms-font-weight-semibold owa-color-neutral-red">
-				<span ref="error" :hidden="!!error"> Error: </span>
+				<span :hidden="!error"> Error: </span>
 			</span>
-			<span ref="errorText" class="_op_61 ms-font-color-neutralPrimary">
+			<span class="_op_61 ms-font-color-neutralPrimary">
 				{{ error }}
 			</span>
 		</div>

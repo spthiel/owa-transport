@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import MSIcon from "../MSIcon.vue";
 
-defineProps<{
+const { iconClasses = [] } = defineProps<{
 	title: string;
 	icon: string;
+	iconClasses: string[];
 }>();
 
 const emit = defineEmits<{
@@ -17,7 +18,7 @@ const emit = defineEmits<{
 		class="_opc_e ms-font-xs ms-font-color-neutralSecondary o365button"
 		@click="emit('click')"
 	>
-		<MSIcon :icon="icon" />
+		<MSIcon :class="iconClasses" :icon="icon" />
 	</button>
 </template>
 
