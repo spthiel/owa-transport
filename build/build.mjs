@@ -1,8 +1,9 @@
-import * as esbuild from "esbuild";
-import * as sass from "sass";
-import fs from "fs/promises";
-import config from "../config.json" with { type: "json" };
 import CleanCSS from "clean-css";
+import * as esbuild from "esbuild";
+import pluginVue from "esbuild-plugin-vue-next";
+import fs from "fs/promises";
+import * as sass from "sass";
+import config from "../config.json" with { type: "json" };
 
 let header = await fs.readFile("header.txt", "utf8");
 
@@ -26,5 +27,6 @@ await esbuild.build({
 		BASE_URL: `"${config.BASE_URL}"`,
 		STYLESHEET: `"${css}"`,
 	},
-	// minify: true,
+	plugins: [pluginVue()],
+	minify: true,
 });

@@ -1,6 +1,9 @@
 import CONST from "../data/CONST";
 import Import from "./Import";
 import Export from "./Export";
+import { createApp } from "vue";
+import RootElement from "../app/RootElement";
+import app from "../app/app";
 
 const FIND_CLASS = CONST.ELEMENT_CLASS;
 
@@ -9,8 +12,11 @@ function isHTMLElement(node: Node): node is HTMLElement {
 }
 
 function inject(target: HTMLDivElement) {
-	target.appendChild(Export.getElement());
-	target.appendChild(Import.getElement());
+	// target.appendChild(Export.getElement());
+	// target.appendChild(Import.getElement());
+	const rootElement = RootElement(target);
+
+	app(rootElement);
 }
 
 function callback(records: MutationRecord[]) {
@@ -56,6 +62,8 @@ function callback(records: MutationRecord[]) {
 
 function observe() {
 	const observer = new MutationObserver(callback);
+
+	console.log('Observing')
 
 	observer.observe(document.body, {
 		subtree: true,

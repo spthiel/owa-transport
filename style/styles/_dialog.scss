@@ -3,6 +3,7 @@ $backdrop: rgba(255, 255, 255, 0.65);
 
 .owa-transport {
 	all: unset;
+	display: none;
 	top: 50px;
 	right: 0;
 	bottom: 0;
@@ -36,6 +37,10 @@ $backdrop: rgba(255, 255, 255, 0.65);
 		overflow-y: auto;
 		flex-grow: 1;
 	}
+}
+
+.owa-transport[open] {
+	display: block;
 }
 
 @starting-style {
